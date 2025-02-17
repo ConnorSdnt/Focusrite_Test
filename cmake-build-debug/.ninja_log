@@ -1,0 +1,4 @@
+# ninja log v6
+498	532	1739810221942759416	device_control_placement_test_2	a81bd81ec71db9a4
+7	498	1739810221451565212	CMakeFiles/device_control_placement_test_2.dir/main.cpp.o	46dc91710b28ad41
+1	42	1739810281651393499	build.ninja	137a2c7c2691073d
