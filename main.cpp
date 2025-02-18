@@ -7,7 +7,7 @@
 #include <iostream>
 
 
-// #define DEBUG //Uncomment this line for debug statments in the console
+#define DEBUG //Uncomment this line for debug statements in the console
 
 
 class Device
@@ -34,7 +34,7 @@ public:
         listeners.erase (std::ranges::remove (listeners, listener).begin (), listeners.end ());
     }
 
-    std::string getModelName () const
+    [[nodiscard]] std::string getModelName () const
     {
         return modelName;
     }
@@ -45,7 +45,7 @@ public:
         notifyListeners ("preampLevel", preampLevelDb);
     }
 
-    int getPreampLevel () const
+    [[nodiscard]] int getPreampLevel () const
     {
         return preampLevelDb;
     }
@@ -55,7 +55,7 @@ public:
         notifyListeners ("phantomPower", state);
     }
 
-    bool getPhantomPower() const{
+    [[nodiscard]] bool getPhantomPower() const{
         return phantomEnabled;
     }
 
@@ -133,12 +133,12 @@ bool processDeviceCommand (const std::string & command, Device & device)
                 device.setPreampLevel (level);
                 return true;
             }
-        } catch (const std::invalid_argument & e) {
+        } catch (const std::invalid_argument& e) {
             #ifdef DEBUG
                 std::cerr << "Invalid number format: " << e.what () << "\n";
             #endif
             return false;
-        } catch (const std::out_of_range & e) {
+        } catch (const std::out_of_range& e) {
             #ifdef DEBUG
                 std::cerr << "Value out of range: " << e.what () << "\n";
             #endif
