@@ -116,10 +116,20 @@ bool processDeviceCommand (const std::string & command, Device & device)
     if (auto preampLevel = findValueString (command, "set-preamp-level"); preampLevel.has_value ())
     {
         const auto level = std::stoi (*preampLevel);
-        device.setPreampLevel (level);
-        return true;
+
+        if (level >= Device::MINUS_INFINITY_DB && level <= Device::UNITY_GAIN_DB) {
+            device.setPreampLevel (level);
+            return true;
+        }
+
+        return false;
     }
 
+    /*
+     * If the string 'command' contains the prefix 'set-phantom-power', then extract the value at the end of the string
+     * Values ['on', or 1] return true
+     * Values ['off', or 0] return false
+     */
     if (auto phantomstate = findValueString(command, "set-phantom-power"); phantomstate.has_value ())
     {
         const auto value = phantomstate.value();
