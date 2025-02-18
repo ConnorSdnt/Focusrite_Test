@@ -7,6 +7,9 @@
 #include <iostream>
 
 
+// #define DEBUG //Uncomment this line for debug statments in the console
+
+
 class Device
 {
 public:
@@ -49,10 +52,10 @@ public:
 
     void setPhantomPower(bool state) {
         phantomEnabled = state;
-        notifyListeners ("Phantom Power", state);
+        notifyListeners ("phantomPower", state);
     }
 
-    bool getPhantomPower() {
+    bool getPhantomPower() const{
         return phantomEnabled;
     }
 
@@ -106,7 +109,15 @@ std::optional<std::string> findValueString (const std::string & input, const std
         return std::nullopt;
 
     auto value = input.substr (controlPrefix.length ());
+
     value.erase (std::ranges::remove_if (value, isspace).begin (), value.end ());
+
+    if (value.empty()) { // If the input is only the command. I.e "set-preamp-level" with no value, then return std::nullopt
+        #ifdef DEBUG
+            std::cerr << "No value after command" << "\n";
+        #endif
+        return std::nullopt;
+    }
 
     return value;
 }
@@ -115,11 +126,23 @@ bool processDeviceCommand (const std::string & command, Device & device)
 {
     if (auto preampLevel = findValueString (command, "set-preamp-level"); preampLevel.has_value ())
     {
-        const auto level = std::stoi (*preampLevel);
+        try {
+            const auto level = std::stoi (*preampLevel);
 
-        if (level >= Device::MINUS_INFINITY_DB && level <= Device::UNITY_GAIN_DB) {
-            device.setPreampLevel (level);
-            return true;
+            if (level >= Device::MINUS_INFINITY_DB && level <= Device::UNITY_GAIN_DB) {
+                device.setPreampLevel (level);
+                return true;
+            }
+        } catch (const std::invalid_argument & e) {
+            #ifdef DEBUG
+                std::cerr << "Invalid number format: " << e.what () << "\n";
+            #endif
+            return false;
+        } catch (const std::out_of_range & e) {
+            #ifdef DEBUG
+                std::cerr << "Value out of range: " << e.what () << "\n";
+            #endif
+            return false;
         }
 
         return false;
@@ -130,9 +153,9 @@ bool processDeviceCommand (const std::string & command, Device & device)
      * Values ['on', or 1] return true
      * Values ['off', or 0] return false
      */
-    if (auto phantomstate = findValueString(command, "set-phantom-power"); phantomstate.has_value ())
+    if (auto phantomState = findValueString(command, "set-phantom-power"); phantomState.has_value ())
     {
-        const auto value = phantomstate.value();
+        const auto value = phantomState.value();
 
         if (value == "on" || value == "1")
         {
